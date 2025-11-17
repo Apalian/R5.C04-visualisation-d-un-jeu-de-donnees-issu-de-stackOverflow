@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StackOverflow Survey 2023 - Visualisation des données</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="bg-dark text-white py-4">
+        <div class="container">
+            <h1>Analyse StackOverflow Developer Survey 2023</h1>
+            <p class="mb-0">Visualisation des salaires et technologies par région</p>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <section class="mb-5">
+            <h2 class="mb-4">Revenu moyen selon l'expérience professionnelle</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="continent-exp" class="form-label">Continent</label>
+                            <select id="continent-exp" class="form-select">
+                                <option value="all">Tous les continents</option>
+                                <option value="europe">Europe</option>
+                                <option value="north_america">Amérique du Nord</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="country-exp" class="form-label">Pays</label>
+                            <select id="country-exp" class="form-select">
+                                <option value="all">Tous les pays</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Revenu moyen par années d'expérience</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="chart-experience"></canvas>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Revenu moyen par niveau d'études</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="chart-education"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-4">Revenu moyen selon les compétences techniques</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="experience-tech" class="form-label">Années d'expérience</label>
+                            <select id="experience-tech" class="form-select">
+                                <option value="all">Toutes</option>
+                                <option value="0-2">0-2 ans</option>
+                                <option value="3-5">3-5 ans</option>
+                                <option value="6-10">6-10 ans</option>
+                                <option value="11+">11+ ans</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="continent-tech" class="form-label">Continent</label>
+                            <select id="continent-tech" class="form-select">
+                                <option value="all">Tous les continents</option>
+                                <option value="europe">Europe</option>
+                                <option value="north_america">Amérique du Nord</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="country-tech" class="form-label">Pays</label>
+                            <select id="country-tech" class="form-select">
+                                <option value="all">Tous les pays</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Revenu moyen par plateforme cloud</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="chart-cloud"></canvas>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Revenu moyen par framework web</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="chart-frameworks"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-4">Technologies les plus utilisées</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="devtype" class="form-label">Métier (DevType)</label>
+                            <select id="devtype" class="form-select">
+                                <option value="all">Tous les métiers</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="continent-tech-usage" class="form-label">Continent</label>
+                            <select id="continent-tech-usage" class="form-select">
+                                <option value="all">Tous les continents</option>
+                                <option value="europe">Europe</option>
+                                <option value="north_america">Amérique du Nord</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="top-n" class="form-label">Top N</label>
+                            <select id="top-n" class="form-select">
+                                <option value="5">Top 5</option>
+                                <option value="6">Top 6</option>
+                                <option value="7">Top 7</option>
+                                <option value="8">Top 8</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="h5 mb-0">Top systèmes d'exploitation</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chart-os"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="h5 mb-0">Top outils de communication</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chart-communication"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">Projet R5.C04 - IUT Informatique BUT3 AGED - 2025</p>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script src="js/utils.js"></script>
+    <script src="js/dataLoader.js"></script>
+    <script src="js/dataProcessor.js"></script>
+    <script src="js/chartManager.js"></script>
+    <script src="js/main.
