@@ -116,12 +116,11 @@ function calculateAverage(numbers) {
  */
 function convertToEuro(salary, currency) {
   if (!salary || !currency) return 0;
-
+  const code = currency.replace(/\t.*/, "");
   const rates = {
     USD: 0.92,
     GBP: 1.17,
     CAD: 0.68,
-    EUR: 1.0,
     CHF: 1.05,
     SEK: 0.088,
     NOK: 0.087,
@@ -131,7 +130,7 @@ function convertToEuro(salary, currency) {
     MXN: 0.051,
   };
 
-  const rate = rates[currency] || 1.0;
+  const rate = rates[code] || 1.0;
   return Math.round(salary * rate);
 }
 
@@ -139,10 +138,6 @@ function convertToEuro(salary, currency) {
  * Extrait le salaire en euros d'une entrée
  */
 function getSalaryInEuro(entry) {
-  if (entry.ConvertedCompYearly) {
-    return convertToEuro(parseFloat(entry.ConvertedCompYearly), "USD");
-  }
-
   if (entry.CompTotal && entry.Currency) {
     return convertToEuro(parseFloat(entry.CompTotal), entry.Currency);
   }
@@ -157,7 +152,6 @@ function normalizeExperience(yearsCodePro) {
   if (!yearsCodePro) return null;
 
   const exp = yearsCodePro.toLowerCase();
-
   if (exp.includes("less than 1")) return "0-1";
   if (exp.includes("1") && !exp.includes("10")) return "1-2";
   if (exp.includes("2")) return "1-2";
@@ -204,7 +198,7 @@ function calculateAverageSalaryByExperience(data, filters) {
 
   filteredData.forEach((entry) => {
     const salary = getSalaryInEuro(entry);
-    if (salary <= 0 || salary > 500000) return;
+    if (salary <= 0 || salary > 50000000) return;
 
     const expCategory = normalizeExperience(entry.YearsCodePro);
     if (expCategory && experienceGroups[expCategory]) {

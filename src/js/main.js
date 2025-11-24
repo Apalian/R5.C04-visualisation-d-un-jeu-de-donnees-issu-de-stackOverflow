@@ -234,6 +234,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     hideLoader();
     alert("Erreur lors du chargement des données. Voir la console.");
-    console.error("❌ Erreur fatale:", error);
+    console.error("Erreur fatale:", error);
   }
 });
