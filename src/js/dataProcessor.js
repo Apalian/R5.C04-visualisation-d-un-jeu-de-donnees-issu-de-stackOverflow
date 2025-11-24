@@ -90,7 +90,6 @@ function filterData(data, filters) {
       }
     }
 
-    // Filtre DevType
     if (filters.devType && filters.devType !== "all") {
       if (!entry.DevType || !entry.DevType.includes(filters.devType)) {
         return false;

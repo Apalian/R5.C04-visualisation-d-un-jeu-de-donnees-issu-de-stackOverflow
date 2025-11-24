@@ -1,5 +1,3 @@
-// chartManager.js - Gestion des graphiques
-
 const chartInstances = {};
 
 /**
