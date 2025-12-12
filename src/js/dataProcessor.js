@@ -1,95 +1,69 @@
-// dataProcessor.js - Traitement et agrégation des données
+/**
+ * Normalise les années d'expérience en catégories logiques
+ */
+function normalizeExperience(yearsCodePro) {
+  if (!yearsCodePro || yearsCodePro === 'NA') return null;
+
+  if (yearsCodePro === 'Less than 1 year') return '0-2';
+  if (yearsCodePro === 'More than 50 years') return '31+';
+
+  const years = parseInt(yearsCodePro, 10);
+  
+  if (isNaN(years)) return null;
+
+  if (years <= 2) return '0-2';
+  if (years <= 5) return '3-5';
+  if (years <= 10) return '6-10';
+  if (years <= 15) return '11-15';
+  if (years <= 20) return '16-20';
+  if (years <= 30) return '21-30';
+  
+  return '31+';
+}
 
 /**
  * Filtre les données selon les critères
  */
 function filterData(data, filters) {
   return data.filter((entry) => {
-    // Filtre continent
+    // 1. Filtre continent
     if (filters.continent && filters.continent !== "all") {
       if (filters.continent === "europe") {
         const europeanCountries = [
-          "Germany",
-          "France",
-          "United Kingdom",
-          "Spain",
-          "Italy",
-          "Netherlands",
-          "Poland",
-          "Sweden",
-          "Belgium",
-          "Switzerland",
-          "Austria",
-          "Norway",
-          "Denmark",
-          "Finland",
-          "Ireland",
-          "Portugal",
-          "Czech Republic",
-          "Romania",
-          "Greece",
-          "Hungary",
+          "Germany", "France", "United Kingdom", "Spain", "Italy", 
+          "Netherlands", "Poland", "Sweden", "Belgium", "Switzerland", 
+          "Austria", "Norway", "Denmark", "Finland", "Ireland", 
+          "Portugal", "Czech Republic", "Romania", "Greece", "Hungary"
         ];
         if (!europeanCountries.includes(entry.Country)) return false;
       } else if (filters.continent === "north_america") {
-        const northAmericanCountries = [
-          "United States of America",
-          "Canada",
-          "Mexico",
-        ];
+        const northAmericanCountries = ["United States of America", "Canada", "Mexico"];
         if (!northAmericanCountries.includes(entry.Country)) return false;
       }
     }
 
-    // Filtre pays
+    // 2. Filtre pays
     if (filters.country && filters.country !== "all") {
       if (entry.Country !== filters.country) return false;
     }
 
-    // Filtre années d'expérience
+    // 3. Filtre années d'expérience (Mise à jour pour utiliser la nouvelle normalisation)
     if (filters.experience && filters.experience !== "all") {
-      const yearsCodePro = entry.YearsCodePro;
-      if (!yearsCodePro) return false;
+      const expCategory = normalizeExperience(entry.YearsCodePro);
+      if (!expCategory) return false;
 
-      if (filters.experience === "0-2") {
-        if (
-          !yearsCodePro.includes("Less than 1") &&
-          !yearsCodePro.includes("1") &&
-          !yearsCodePro.includes("2")
-        ) {
-          return false;
-        }
-      } else if (filters.experience === "3-5") {
-        if (
-          !yearsCodePro.includes("3") &&
-          !yearsCodePro.includes("4") &&
-          !yearsCodePro.includes("5")
-        ) {
-          return false;
-        }
-      } else if (filters.experience === "6-10") {
-        if (
-          !yearsCodePro.includes("6") &&
-          !yearsCodePro.includes("7") &&
-          !yearsCodePro.includes("8") &&
-          !yearsCodePro.includes("9") &&
-          !yearsCodePro.includes("10")
-        ) {
-          return false;
-        }
-      } else if (filters.experience === "11+") {
-        if (
-          !yearsCodePro.includes("More than") &&
-          !yearsCodePro.includes("11") &&
-          !yearsCodePro.includes("12") &&
-          !yearsCodePro.includes("15") &&
-          !yearsCodePro.includes("20")
-        ) {
-          return false;
-        }
+      if (filters.experience === "0-2" && expCategory === "0-2") return true;
+      if (filters.experience === "3-5" && expCategory === "3-5") return true;
+      if (filters.experience === "6-10" && expCategory === "6-10") return true;
+      
+      if (filters.experience === "11+") {
+        return ["11-15", "16-20", "21-30", "31+"].includes(expCategory);
       }
+      
+      return false;
     }
 
+    // 4. Filtre métier (DevType)
     if (filters.devType && filters.devType !== "all") {
       if (!entry.DevType || !entry.DevType.includes(filters.devType)) {
         return false;
@@ -116,18 +90,13 @@ function calculateAverage(numbers) {
  */
 function convertToEuro(salary, currency) {
   if (!salary || !currency) return 0;
-  const code = currency.replace(/\t.*/, "");
+  const code = currency.replace(/\t.*/, ""); // Nettoie le code devise
+  
+  // Taux de change approximatifs
   const rates = {
-    USD: 0.92,
-    GBP: 1.17,
-    CAD: 0.68,
-    CHF: 1.05,
-    SEK: 0.088,
-    NOK: 0.087,
-    DKK: 0.134,
-    PLN: 0.23,
-    INR: 0.011,
-    MXN: 0.051,
+    USD: 0.92, GBP: 1.17, CAD: 0.68, CHF: 1.05,
+    SEK: 0.088, NOK: 0.087, DKK: 0.134, PLN: 0.23,
+    INR: 0.011, MXN: 0.051,
   };
 
   const rate = rates[code] || 1.0;
@@ -139,68 +108,35 @@ function convertToEuro(salary, currency) {
  */
 function getSalaryInEuro(entry) {
   if (entry.CompTotal && entry.Currency) {
+    // Certains salaires sont annuels, d'autres mensuels. 
     return convertToEuro(parseFloat(entry.CompTotal), entry.Currency);
   }
-
   return 0;
 }
 
 /**
- * Normalise les années d'expérience
- */
-function normalizeExperience(yearsCodePro) {
-  if (!yearsCodePro) return null;
-
-  const exp = yearsCodePro.toLowerCase();
-  if (exp.includes("less than 1")) return "0-1";
-  if (exp.includes("1") && !exp.includes("10")) return "1-2";
-  if (exp.includes("2")) return "1-2";
-  if (exp.includes("3")) return "3-5";
-  if (exp.includes("4")) return "3-5";
-  if (exp.includes("5")) return "3-5";
-  if (exp.includes("6")) return "6-10";
-  if (exp.includes("7")) return "6-10";
-  if (exp.includes("8")) return "6-10";
-  if (exp.includes("9")) return "6-10";
-  if (exp.includes("10")) return "6-10";
-  if (exp.includes("11")) return "11-15";
-  if (exp.includes("12")) return "11-15";
-  if (exp.includes("13")) return "11-15";
-  if (exp.includes("14")) return "11-15";
-  if (exp.includes("15")) return "11-15";
-  if (
-    exp.includes("more than") ||
-    exp.includes("20") ||
-    exp.includes("30") ||
-    exp.includes("40") ||
-    exp.includes("50")
-  ) {
-    return "15+";
-  }
-
-  return null;
-}
-
-/**
- * 1. Calcule le revenu moyen par années d'expérience
+ * 1. Calcule le revenu moyen par années d'expérience (Graphique principal)
  */
 function calculateAverageSalaryByExperience(data, filters) {
   const filteredData = filterData(data, filters);
 
   const experienceGroups = {
-    "0-1": [],
-    "1-2": [],
+    "0-2": [],
     "3-5": [],
     "6-10": [],
     "11-15": [],
-    "15+": [],
+    "16-20": [],
+    "21-30": [],
+    "31+": [],
   };
 
   filteredData.forEach((entry) => {
     const salary = getSalaryInEuro(entry);
+    // Filtrage des valeurs aberrantes 
     if (salary <= 0 || salary > 50000000) return;
 
     const expCategory = normalizeExperience(entry.YearsCodePro);
+    
     if (expCategory && experienceGroups[expCategory]) {
       experienceGroups[expCategory].push(salary);
     }
@@ -211,8 +147,10 @@ function calculateAverageSalaryByExperience(data, filters) {
     values: [],
   };
 
+  // Construction du résultat pour Chart.js
   Object.keys(experienceGroups).forEach((category) => {
     const salaries = experienceGroups[category];
+    // On n'affiche la barre que s'il y a des données (ou on peut laisser 0)
     if (salaries.length > 0) {
       result.labels.push(`${category} ans`);
       result.values.push(calculateAverage(salaries));
@@ -227,12 +165,11 @@ function calculateAverageSalaryByExperience(data, filters) {
  */
 function calculateAverageSalaryByEducation(data, filters) {
   const filteredData = filterData(data, filters);
-
   const educationGroups = {};
 
   filteredData.forEach((entry) => {
     const salary = getSalaryInEuro(entry);
-    if (salary <= 0 || salary > 500000) return;
+    if (salary <= 0 || salary > 50000000) return;
 
     const education = entry.EdLevel;
     if (!education) return;
@@ -251,6 +188,7 @@ function calculateAverageSalaryByEducation(data, filters) {
   Object.entries(educationGroups)
     .sort((a, b) => calculateAverage(b[1]) - calculateAverage(a[1]))
     .forEach(([education, salaries]) => {
+      // Filtre pour ne garder que les catégories avec assez de données
       if (salaries.length > 5) {
         result.labels.push(education);
         result.values.push(calculateAverage(salaries));
@@ -265,12 +203,11 @@ function calculateAverageSalaryByEducation(data, filters) {
  */
 function calculateAverageSalaryByCloudPlatform(data, filters) {
   const filteredData = filterData(data, filters);
-
   const platformGroups = {};
 
   filteredData.forEach((entry) => {
     const salary = getSalaryInEuro(entry);
-    if (salary <= 0 || salary > 500000) return;
+    if (salary <= 0 || salary > 50000000) return;
 
     const platforms = entry.PlatformHaveWorkedWith;
     if (!platforms) return;
@@ -306,12 +243,11 @@ function calculateAverageSalaryByCloudPlatform(data, filters) {
  */
 function calculateAverageSalaryByWebFramework(data, filters) {
   const filteredData = filterData(data, filters);
-
   const frameworkGroups = {};
 
   filteredData.forEach((entry) => {
     const salary = getSalaryInEuro(entry);
-    if (salary <= 0 || salary > 500000) return;
+    if (salary <= 0 || salary > 50000000) return;
 
     const frameworks = entry.WebframeHaveWorkedWith;
     if (!frameworks) return;
@@ -348,6 +284,7 @@ function calculateAverageSalaryByWebFramework(data, filters) {
 function calculateTopOperatingSystems(data, filters, topN = 5) {
   const filteredData = filterData(data, filters);
   const osCounts = {};
+  
   filteredData.forEach((entry) => {
     const os = entry.OpSysProfessionaluse;
     if (!os) return;
@@ -379,7 +316,6 @@ function calculateTopOperatingSystems(data, filters, topN = 5) {
  */
 function calculateTopCommunicationTools(data, filters, topN = 5) {
   const filteredData = filterData(data, filters);
-
   const toolCounts = {};
 
   filteredData.forEach((entry) => {
